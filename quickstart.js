@@ -17,7 +17,8 @@ fs.readFile('client_secret.json', function processClientSecrets(err, content) {
   }
   // Authorize a client with the loaded credentials, then call the
   // Gmail API.
-  authorize(JSON.parse(content), listLabels);
+  // authorize(JSON.parse(content), listLabels);
+  authorize(JSON.parse(content), listMessages);
 });
 
 /**
@@ -124,31 +125,35 @@ function listLabels(auth) {
   });
 }
 
-
-function listMessages(userId, query, callback) {
-  var getPageOfMessages = function(request, result) {
-    request.execute(function(resp) {
-      result = result.concat(resp.messages);
-      var nextPageToken = resp.nextPageToken;
-      if (nextPageToken) {
-        request = gapi.client.gmail.users.messages.list({
-          'userId': userId,
-          'pageToken': nextPageToken,
-          'q': query
-        });
-        getPageOfMessages(request, result);
-      } else {
-        callback(result);
-      }
-    });
-  };
-  var initialRequest = gapi.client.gmail.users.messages.list({
-    'userId': userId,
-    'q': query
+function listMessages(auth) {
+  var gmail = google.gmail('v1');
+  // gmail.users.messages.list({
+  gmail.users.messages.get({
+    auth: auth,
+    userId: 'me',
+    id: '156130ee084a9271'
+  }, function(err, response) {
+    if (err) {
+      console.log('The API returned an error: ' + err);
+      return;
+    }
+    console.log(response.snippet);
+    // var messages = response.messages;
+    //     for (var i = 0; i < messages.length; i++) {
+    //     var message = messages[i];
+    //     console.log('- %s', message);
+    //   }
+    // if (labels.length == 0) {
+    //   console.log('No labels found.');
+    // } else {
+    //   console.log('Labels:');
+    //   for (var i = 0; i < labels.length; i++) {
+    //     var label = labels[i];
+    //     console.log('- %s', label.name);
+    //   }
+    // }
   });
-  getPageOfMessages(initialRequest, []);
 }
 
-// listMessages();
 
 // alexpyrielnodejs@gmail.com
