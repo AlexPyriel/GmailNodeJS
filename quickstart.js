@@ -8,6 +8,7 @@ var googleAuth = require('google-auth-library');
 var SCOPES = ['https://www.googleapis.com/auth/gmail.readonly'];
 var TOKEN_DIR = 'D:/NodeJS/GmailNodeJStest/.credentials/';
 var TOKEN_PATH = TOKEN_DIR + 'gmail-nodejs-quickstart.json';
+var ATTCH_DIR = 'D:/NodeJS/GmailNodeJStest/attachments/';
 
 // Load client secrets from a local file.
 fs.readFile('client_secret.json', function processClientSecrets(err, content) {
@@ -125,35 +126,110 @@ function listLabels(auth) {
   });
 }
 
-function listMessages(auth) {
+// Here begins my code
+
+var messages; //global variable to store an array of message id's got from gmail.
+
+function listMessages(auth) { // Lists and stores an array of message id's to var."messages"
   var gmail = google.gmail('v1');
-  // gmail.users.messages.list({
-  gmail.users.messages.get({
+  gmail.users.messages.list({
     auth: auth,
     userId: 'me',
-    id: '156130ee084a9271'
   }, function(err, response) {
     if (err) {
       console.log('The API returned an error: ' + err);
       return;
     }
-    console.log(response.snippet);
-    // var messages = response.messages;
-    //     for (var i = 0; i < messages.length; i++) {
-    //     var message = messages[i];
-    //     console.log('- %s', message);
-    //   }
-    // if (labels.length == 0) {
-    //   console.log('No labels found.');
-    // } else {
-    //   console.log('Labels:');
-    //   for (var i = 0; i < labels.length; i++) {
-    //     var label = labels[i];
-    //     console.log('- %s', label.name);
-    //   }
-    // }
+    messages = response.messages;
+    if (messages.length == 0) {
+      console.log('No messages found.');
+    } else {
+      console.log('Messages ID\'s:');
+      for (var i = 0; i < messages.length; i++) {
+        var message = messages[i];
+        console.log('- %s', message.id);
+      }
+        console.log('');
+    }
+  authorizeAndgetMessagesTitles(); // call the 'getMessagesInfo' function within an authorization process
   });
 }
 
+function getMessagesInfo(auth) {
+  var gmail = google.gmail('v1');
+  for (var i = 0; i < messages.length; i++) {
+      gmail.users.messages.get({
+      auth: auth,
+      userId: 'me',
+      id: messages[i].id
+  }, function(err, response) {
+    if (err) {
+      console.log('The API returned an error: ' + err);
+      return;
+    }
+    // console.log(response.id + " : " + response.labelIds + '\n' + response.snippet);
+    if (response.payload.parts) {
+          console.log(response.id + " : " + response.labelIds + '\n' + response.snippet);
+          console.log('Attachments array length: ' + response.payload.parts.length + '\n');
+      for (var i = 0; i < response.payload.parts.length; i++) {
+          if (response.payload.parts[i].filename && response.payload.parts[i].filename.length > 0) {
+          // if (response.payload.parts[i].mimeType !== 'text/html'&& response.payload.parts[i].mimeType !== 'text/plain') {
+              // console.log(response.id + " : " + response.labelIds + '\n' + response.snippet);
+              // console.log('Attachments array length: ' + response.payload.parts.length);
+              // console.log(response.payload.parts[i]);
+              console.log('Attachment filename: ' + response.payload.parts[i].filename);
+              // console.log('Attachment ID: ' + response.payload.parts[i].body.attachmentId + '\n');
+              // storeAttachment(response.payload.parts[i]);
+          }
+      }
+    }
+    console.log('\n');
+   });
+  }
+}
 
-// alexpyrielnodejs@gmail.com
+function storeAttachment(file) {
+  // try {
+  //   fs.mkdirSync(ATTCH_DIR);
+  // } catch (err) {
+  //   if (err.code != 'EEXIST') {
+  //     throw err;
+  //   }
+  // }
+  console.log('Name of file to store: ' + file.filename);
+  fs.writeFile(ATTCH_DIR + file.filename, file.data);
+  console.log('Attachment stored to ' + ATTCH_DIR);
+}
+
+function getAttachments(userId, message, callback) {
+  var parts = message.payload.parts;
+  for (var i = 0; i < parts.length; i++) {
+    var part = parts[i];
+    if (part.filename && part.filename.length > 0) {
+      var attachId = part.body.attachmentId;
+      var request = gapi.client.gmail.users.messages.attachments.get({
+        'id': attachId,
+        'messageId': message.id,
+        'userId': userId
+      });
+      request.execute(function(attachment) {
+        callback(part.filename, part.mimeType, attachment);
+      });
+    }
+  }
+}
+
+var authorizeAndgetMessagesTitles = function() { //calls the 'getMessagesInfo'function within an authorization process
+  fs.readFile('client_secret.json', function processClientSecrets(err, content, func) {
+  if (err) {
+    console.log('Error loading client secret file: ' + err);
+    return;
+  }
+  // Authorize a client with the loaded credentials, then call the
+  // Gmail API.
+  // authorize(JSON.parse(content), listLabels);
+  authorize(JSON.parse(content), getMessagesInfo);
+});
+};
+
+// alexpyrielnodejs@gmail.com - email used for testing purposes
