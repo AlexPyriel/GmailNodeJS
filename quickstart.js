@@ -19,6 +19,7 @@ fs.readFile('client_secret.json', function processClientSecrets(err, content) {
   // Authorize a client with the loaded credentials, then call the
   // Gmail API.
   // authorize(JSON.parse(content), listLabels);
+  storedSecret = JSON.parse(content);
   authorize(JSON.parse(content), listMessages);
 });
 
@@ -129,6 +130,7 @@ function listLabels(auth) {
 // Here begins my code
 
 var messages; //global variable to store an array of message id's got from gmail.
+var storedSecret;
 
 function listMessages(auth) { // Lists and stores an array of message id's to var."messages"
   var gmail = google.gmail('v1');
@@ -151,7 +153,8 @@ function listMessages(auth) { // Lists and stores an array of message id's to va
       }
         console.log('');
     }
-  authorizeAndgetMessagesTitles(); // call the 'getMessagesInfo' function within an authorization process
+    authorize(storedSecret, getMessagesInfo);
+  // authorizeAndgetMessagesTitles(); // call the 'getMessagesInfo' function within an authorization process
   });
 }
 
