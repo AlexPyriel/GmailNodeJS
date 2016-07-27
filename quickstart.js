@@ -193,6 +193,7 @@ function getAttachments(auth, message) {
           // storeAttachment();
           console.log(part.filename);
           console.log(part.mimeType);
+          console.log(part.body);
           
       });
     }
