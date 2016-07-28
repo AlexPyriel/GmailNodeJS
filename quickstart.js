@@ -143,12 +143,13 @@ function getMessagesInfo(auth) {
     auth: auth,
     userId: 'me',
     id: '15627b0d846e6796'
-  }, function (err, response) {
-    if (err) {
-      console.log('The API returned an error: ' + err);
-      return;
-    }
-    getAttachments(auth, response);
+  }, getAttachments.bind(this, auth) ); 
+  // (err, auth, response) {
+  //   if (err) {
+  //     console.log('The API returned an error: ' + err);
+  //     return;
+  //   }
+    // getAttachments(err, auth, response);
     // if (response.payload.parts) {
     //   console.log(response.id + " : " + response.labelIds + '\n' + response.snippet);
     //   for (var i = 0; i < response.payload.parts.length; i++) {
@@ -160,7 +161,7 @@ function getMessagesInfo(auth) {
     //     }
     //   }
     // }
-  });
+//   });
 }
 
 // function getMessagesInfo(auth) {
@@ -206,40 +207,47 @@ function storeAttachment(file) {
   console.log('Attachment stored to ' + ATTCH_DIR);
 }
 
-function getAttachments(auth, message) {
-  var gmail = google.gmail('v1');
+function getAttachments(auth, err, message) {
+  if (err) {
+      console.log('The API returned an error: ' + err);
+      return;
+    }
   var parts = message.payload.parts;
-  // console.log(parts);
+  console.log(parts);
 
   for (var i = 0; i < parts.length; i++) {
     var part = parts[i];
     if (part.filename && part.filename.length > 0) {
       var attachId = part.body.attachmentId;
-      gmail.users.messages.attachments.get({
-        auth: auth,
-        'id': attachId,
-        'messageId': message.id,
-        'userId': 'me'
-      }, function (err, response) {
-        console.log(part.filename);
-        console.log(part.mimeType);
-        console.log(message.id);
-        console.log(attachId);
-        console.log(response.size);
-        // console.log(response.data);
-
-        // var dataToEncode = response.data;
-        // // var buf = new Buffer(dataToEncode, 'base64').toString("ascii"); 
-        // var buf = new Buffer(dataToEncode, 'base64');
-        // // var buf = Buffer.from(dataToEncode, 'base64'); // Node.js v6.0.0
-        // // console.log(buf);
-
-        // fs.writeFile(ATTCH_DIR + part.filename, buf);
-      });
+      foo(part, auth, attachId, message.id);
     }
   }
 }
+function foo(part, auth, attachId, messageid) {
+  var gmail = google.gmail('v1');
+  
+  gmail.users.messages.attachments.get({
+        auth: auth,
+        'id': attachId,
+        'messageId': messageid,
+        'userId': 'me'
+      }, function (err, response) {
+        console.log('имя файла ' + part.filename);
+        console.log('маймтайп ' + part.mimeType);
+        console.log('айди соощения ' + messageid);
+        console.log('айди аттача ' + attachId);
+        console.log('размер аттача ' + response.size);
+        // console.log(response.data);
 
+        var dataToEncode = response.data;
+        // // var buf = new Buffer(dataToEncode, 'base64').toString("ascii"); 
+        var buf = new Buffer(dataToEncode, 'base64');
+        // // var buf = Buffer.from(dataToEncode, 'base64'); // Node.js v6.0.0
+        // // console.log(buf);
+
+        fs.writeFile(ATTCH_DIR + part.filename, buf);
+      });
+}
 // alexpyrielnodejs@gmail.com - email used for testing purposes
 
 // function getAttachments(userId, message, callback) {
