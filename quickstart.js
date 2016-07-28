@@ -6,13 +6,13 @@ var googleAuth = require('google-auth-library');
 // If modifying these scopes, delete your previously saved credentials
 // at ~/.credentials/gmail-nodejs-quickstart.json
 var SCOPES = ['https://www.googleapis.com/auth/gmail.readonly'];
-var TOKEN_DIR = 'D:/NodeJS/GmailNodeJStest/.credentials/';
-var TOKEN_PATH = TOKEN_DIR + 'gmail-nodejs-quickstart.json';
-var ATTCH_DIR = 'D:/NodeJS/GmailNodeJStest/attachments/';
-
-// var TOKEN_DIR = '/Users/AlexPyriel/Applications/parser/.credentials/';
+// var TOKEN_DIR = 'D:/NodeJS/GmailNodeJStest/.credentials/';
 // var TOKEN_PATH = TOKEN_DIR + 'gmail-nodejs-quickstart.json';
-// var ATTCH_DIR = '/Users/AlexPyriel/Applications/parser/attachments/';
+// var ATTCH_DIR = 'D:/NodeJS/GmailNodeJStest/attachments/';
+
+var TOKEN_DIR = '/Users/AlexPyriel/Applications/parser/.credentials/';
+var TOKEN_PATH = TOKEN_DIR + 'gmail-nodejs-quickstart.json';
+var ATTCH_DIR = '/Users/AlexPyriel/Applications/parser/attachments/';
 
 // Load client secrets from a local file.
 fs.readFile('client_secret.json', function processClientSecrets(err, content) {
@@ -104,7 +104,8 @@ function storeToken(token) {
 
 // Here my code begins 
 
-var messages; //var. to store an array of message id's got from gmail.
+var messageCounter = 0;
+var attachCounter = 0;
 var storedSecret; //var. to store client_secret data to avoid further fs.readfile function calls
 
 /**
@@ -112,9 +113,9 @@ var storedSecret; //var. to store client_secret data to avoid further fs.readfil
  *
  * @param {google.auth.OAuth2} auth An authorized OAuth2 client.
  */
-function listMessages(auth) {
+function listMessages(auth) { //gets an array [ { id: '', threadId: ''}, {...} ]
   var gmail = google.gmail('v1');
-  gmail.users.messages.list({
+  gmail.users.messages.list({ // returns messages [{id:'',threadId:''},{...}] + resultSizeEstimate
     auth: auth,
     userId: 'me',
   }, function (err, response) {
@@ -122,75 +123,73 @@ function listMessages(auth) {
       console.log('The API returned an error: ' + err);
       return;
     }
-    messages = response.messages;
+    var messages = response.messages; // array [{id:'',threadId:''},{...}] 
     if (messages.length === 0) {
       console.log('No messages found.');
     } else {
-      console.log('Messages ID\'s:');
-      for (var i = 0; i < messages.length; i++) {
-        var message = messages[i];
-        console.log('- %s', message.id);
-      }
+      console.log('Messages:');
+      console.log(messages);
       console.log('');
+      for (var i = 0; i < messages.length; i++) {
+        getMessage(auth, messages[i].id); // тут был вызов через authorize
+      }
     }
-    authorize(storedSecret, getMessagesInfo);
   });
 }
 
-function getMessagesInfo(auth) {
+function getMessage(auth, messageID) {
   var gmail = google.gmail('v1');
   gmail.users.messages.get({
     auth: auth,
     userId: 'me',
-    id: '15627b0d846e6796'
-  }, getAttachments.bind(this, auth) ); 
-  // (err, auth, response) {
-  //   if (err) {
-  //     console.log('The API returned an error: ' + err);
-  //     return;
-  //   }
-    // getAttachments(err, auth, response);
-    // if (response.payload.parts) {
-    //   console.log(response.id + " : " + response.labelIds + '\n' + response.snippet);
-    //   for (var i = 0; i < response.payload.parts.length; i++) {
-    //     if (response.payload.parts[i].filename && response.payload.parts[i].filename.length > 0 && response.payload.parts[i].body.size > 0) {
-    //       // console.log(response.payload.parts[i]);
-    //       console.log('Attachment filename: ' + response.payload.parts[i].filename);
-    //       console.log('Attachment ID: ' + response.payload.parts[i].body.attachmentId + '\n');
-    //       // storeAttachment(response.payload.parts[i]);
-    //     }
-    //   }
-    // }
-//   });
+    id: messageID
+  }, listAttachments.bind(this, auth));
 }
 
-// function getMessagesInfo(auth) {
-//   var gmail = google.gmail('v1');
-//   for (var i = 0; i < messages.length; i++) {
-//     gmail.users.messages.get({
-//       auth: auth,
-//       userId: 'me',
-//       id: messages[i].id
-//     }, function (err, response) {
-//       if (err) {
-//         console.log('The API returned an error: ' + err);
-//         return;
-//       }
-//       if (response.payload.parts) {
-//         console.log(response.id + " : " + response.labelIds + '\n' + response.snippet);
-//         for (var i = response.payload.parts.length - 1; i < response.payload.parts.length; i++) {
-//           if (response.payload.parts[i].filename && response.payload.parts[i].filename.length > 0 && response.payload.parts[i].body.size > 0) {
-//             console.log(response.payload.parts[i]);
-//             console.log('Attachment filename: ' + response.payload.parts[i].filename);
-//             console.log('Attachment ID: ' + response.payload.parts[i].body.attachmentId + '\n');
-//             // getAttachments(auth, response);
-//             // storeAttachment(response.payload.parts[i]);
-//           }
-//         }
-//       }
-//     });
-//   }
-// }
+function listAttachments(auth, err, message) {
+  if (err) {
+    console.log('The API returned an error: ' + err);
+    return;
+  }
+  // console.log(message.id + ': ' + message.labelIds);
+  if (message.payload.parts) {
+    var parts = message.payload.parts;
+    // console.log(parts);
+    for (var i = 0; i < parts.length; i++) {
+      var part = parts[i];
+      if (part.filename && part.filename.length > 0 && part.body.size > 0) {
+        getAttachment(auth, part, message.id);
+      }
+    }
+  }
+}
+
+function getAttachment(auth, part, messageID) {
+  var gmail = google.gmail('v1');
+  var attachID = part.body.attachmentId;
+  gmail.users.messages.attachments.get({
+    auth: auth,
+    'id': attachID,
+    'messageId': messageID,
+    'userId': 'me'
+  }, function (err, response) {
+    console.log('айди сообщения ' + messageID);
+    // console.log('имя файла ' + part.filename);
+    // console.log('маймтайп ' + part.mimeType);
+    // console.log('айди аттача ' + attachID);
+    // console.log('размер аттача ' + response.size);
+    // var dataToEncode = response.data;
+    // // var attachment = new Buffer(dataToEncode, 'base64').toString("ascii"); 
+    var attachment = new Buffer(response.data, 'base64');
+    // // var attachment = Buffer.from(dataToEncode, 'base64'); // Node.js v6.0.0
+
+    fs.writeFile(ATTCH_DIR + part.filename, attachment);
+    attachCounter++;
+    console.log('Аттачей обработано: ' + attachCounter);
+    console.log('');
+  });
+
+}
 
 function storeAttachment(file) {
   try {
@@ -200,6 +199,13 @@ function storeAttachment(file) {
       throw err;
     }
   }
+  // var dataToEncode = response.data;
+  // // var attachment = new Buffer(dataToEncode, 'base64').toString("ascii"); 
+  var attachment = new Buffer(response.data, 'base64');
+  // // var attachment = Buffer.from(dataToEncode, 'base64'); // Node.js v6.0.0
+
+  fs.writeFile(ATTCH_DIR + part.filename, attachment);
+
   // console.log('Name of file to store: ' + file.filename);
   // fs.writeFile(ATTCH_DIR + file.filename, file.data);
   fs.writeFile(ATTCH_DIR + 'file.txt', file);
@@ -207,63 +213,7 @@ function storeAttachment(file) {
   console.log('Attachment stored to ' + ATTCH_DIR);
 }
 
-function getAttachments(auth, err, message) {
-  if (err) {
-      console.log('The API returned an error: ' + err);
-      return;
-    }
-  var parts = message.payload.parts;
-  console.log(parts);
 
-  for (var i = 0; i < parts.length; i++) {
-    var part = parts[i];
-    if (part.filename && part.filename.length > 0) {
-      var attachId = part.body.attachmentId;
-      foo(part, auth, attachId, message.id);
-    }
-  }
-}
-function foo(part, auth, attachId, messageid) {
-  var gmail = google.gmail('v1');
-  
-  gmail.users.messages.attachments.get({
-        auth: auth,
-        'id': attachId,
-        'messageId': messageid,
-        'userId': 'me'
-      }, function (err, response) {
-        console.log('имя файла ' + part.filename);
-        console.log('маймтайп ' + part.mimeType);
-        console.log('айди соощения ' + messageid);
-        console.log('айди аттача ' + attachId);
-        console.log('размер аттача ' + response.size);
-        // console.log(response.data);
 
-        var dataToEncode = response.data;
-        // // var buf = new Buffer(dataToEncode, 'base64').toString("ascii"); 
-        var buf = new Buffer(dataToEncode, 'base64');
-        // // var buf = Buffer.from(dataToEncode, 'base64'); // Node.js v6.0.0
-        // // console.log(buf);
 
-        fs.writeFile(ATTCH_DIR + part.filename, buf);
-      });
-}
 // alexpyrielnodejs@gmail.com - email used for testing purposes
-
-// function getAttachments(userId, message, callback) {
-//   var parts = message.payload.parts;
-//   for (var i = 0; i < parts.length; i++) {
-//     var part = parts[i];
-//     if (part.filename && part.filename.length > 0) {
-//       var attachId = part.body.attachmentId;
-//       var request = gapi.client.gmail.users.messages.attachments.get({
-//         'id': attachId,
-//         'messageId': message.id,
-//         'userId': userId
-//       });
-//       request.execute(function(attachment) {
-//         callback(part.filename, part.mimeType, attachment);
-//       });
-//     }
-//   }
-// }
