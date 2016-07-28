@@ -6,13 +6,13 @@ var googleAuth = require('google-auth-library');
 // If modifying these scopes, delete your previously saved credentials
 // at ~/.credentials/gmail-nodejs-quickstart.json
 var SCOPES = ['https://www.googleapis.com/auth/gmail.readonly'];
-// var TOKEN_DIR = 'D:/NodeJS/GmailNodeJStest/.credentials/';
-// var TOKEN_PATH = TOKEN_DIR + 'gmail-nodejs-quickstart.json';
-// var ATTCH_DIR = 'D:/NodeJS/GmailNodeJStest/attachments/';
-
-var TOKEN_DIR = '/Users/AlexPyriel/Applications/parser/.credentials/';
+var TOKEN_DIR = 'D:/NodeJS/GmailNodeJStest/.credentials/';
 var TOKEN_PATH = TOKEN_DIR + 'gmail-nodejs-quickstart.json';
-var ATTCH_DIR = '/Users/AlexPyriel/Applications/parser/attachments/';
+var ATTCH_DIR = 'D:/NodeJS/GmailNodeJStest/attachments/';
+
+// var TOKEN_DIR = '/Users/AlexPyriel/Applications/parser/.credentials/';
+// var TOKEN_PATH = TOKEN_DIR + 'gmail-nodejs-quickstart.json';
+// var ATTCH_DIR = '/Users/AlexPyriel/Applications/parser/attachments/';
 
 // Load client secrets from a local file.
 fs.readFile('client_secret.json', function processClientSecrets(err, content) {
@@ -139,29 +139,28 @@ function listMessages(auth) {
 
 function getMessagesInfo(auth) {
   var gmail = google.gmail('v1');
-    gmail.users.messages.get({
-      auth: auth,
-      userId: 'me',
-      id: '15627b0d846e6796'
-    }, function (err, response) {
-      if (err) {
-        console.log('The API returned an error: ' + err);
-        return;
-      }
-            getAttachments(auth, response);
-      
-      if (response.payload.parts) {
-        console.log(response.id + " : " + response.labelIds + '\n' + response.snippet);
-        for (var i = 0; i < response.payload.parts.length; i++) {
-          if (response.payload.parts[i].filename && response.payload.parts[i].filename.length > 0 && response.payload.parts[i].body.size > 0) {
-            // console.log(response.payload.parts[i]);
-            console.log('Attachment filename: ' + response.payload.parts[i].filename);
-            console.log('Attachment ID: ' + response.payload.parts[i].body.attachmentId + '\n');
-            // storeAttachment(response.payload.parts[i]);
-          }
-        }
-      }
-    });
+  gmail.users.messages.get({
+    auth: auth,
+    userId: 'me',
+    id: '15627b0d846e6796'
+  }, function (err, response) {
+    if (err) {
+      console.log('The API returned an error: ' + err);
+      return;
+    }
+    getAttachments(auth, response);
+    // if (response.payload.parts) {
+    //   console.log(response.id + " : " + response.labelIds + '\n' + response.snippet);
+    //   for (var i = 0; i < response.payload.parts.length; i++) {
+    //     if (response.payload.parts[i].filename && response.payload.parts[i].filename.length > 0 && response.payload.parts[i].body.size > 0) {
+    //       // console.log(response.payload.parts[i]);
+    //       console.log('Attachment filename: ' + response.payload.parts[i].filename);
+    //       console.log('Attachment ID: ' + response.payload.parts[i].body.attachmentId + '\n');
+    //       // storeAttachment(response.payload.parts[i]);
+    //     }
+    //   }
+    // }
+  });
 }
 
 // function getMessagesInfo(auth) {
@@ -211,7 +210,9 @@ function getAttachments(auth, message) {
   var gmail = google.gmail('v1');
   var parts = message.payload.parts;
   // console.log(parts);
-    var part = parts[1];
+
+  for (var i = 0; i < parts.length; i++) {
+    var part = parts[i];
     if (part.filename && part.filename.length > 0) {
       var attachId = part.body.attachmentId;
       gmail.users.messages.attachments.get({
@@ -226,22 +227,17 @@ function getAttachments(auth, message) {
         console.log(attachId);
         console.log(response.size);
         // console.log(response.data);
-        console.log(response.attachmentId);
 
-var b64string = response.data;
-// var buf = new Buffer(b64string, 'base64').toString("ascii"); 
-var buf = new Buffer(b64string, 'base64'); 
+        // var dataToEncode = response.data;
+        // // var buf = new Buffer(dataToEncode, 'base64').toString("ascii"); 
+        // var buf = new Buffer(dataToEncode, 'base64');
+        // // var buf = Buffer.from(dataToEncode, 'base64'); // Node.js v6.0.0
+        // // console.log(buf);
 
-// console.log(buf);
-
-
-        fs.writeFile(ATTCH_DIR + part.filename, buf);
-        // var h = require('fs').createReadStream(response.data);
-        // var foo = require('fs').createWriteStream(ATTCH_DIR + part.filename);
-        // h.pipe(foo);
+        // fs.writeFile(ATTCH_DIR + part.filename, buf);
       });
     }
-  
+  }
 }
 
 // alexpyrielnodejs@gmail.com - email used for testing purposes
