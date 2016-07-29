@@ -2,7 +2,7 @@ var fs = require('fs');
 var readline = require('readline');
 var google = require('googleapis');
 var googleAuth = require('google-auth-library');
-var config = require('./config');
+var config = require('../config');
 
 // If modifying these scopes, delete your previously saved credentials
 // at ~/.credentials/gmail-nodejs-quickstart.json
@@ -16,7 +16,7 @@ var ATTCH_DIR = config.get('attch_dir');
 // var ATTCH_DIR = '/Users/AlexPyriel/Applications/GmailNodeJStest/attachments/';
 
 // Load client secrets from a local file.
-function execute() { 
+function execute() {
   fs.readFile('client_secret.json', function processClientSecrets(err, content) {
     if (err) {
       console.log('Error loading client secret file: ' + err);
@@ -28,7 +28,7 @@ function execute() {
   });
 }
 
-execute(); //точка вхождения 
+// execute(); //точка вхождения 
 
 /**
  * Create an OAuth2 client with the given credentials, and then execute the
@@ -181,20 +181,12 @@ function getAttachment(auth, part, messageID) {
     // console.log('маймтайп ' + part.mimeType);
     // console.log('айди аттача ' + attachID);
     // console.log('размер аттача ' + response.size);
-    // var dataToEncode = response.data;
-    // // var attachment = new Buffer(dataToEncode, 'base64').toString("ascii"); 
-    var attachment = new Buffer(response.data, 'base64');
-    // // var attachment = Buffer.from(dataToEncode, 'base64'); // Node.js v6.0.0
-
-    fs.writeFile(ATTCH_DIR + part.filename, attachment);
-    attachCounter++;
-    console.log('Аттачей обработано: ' + attachCounter);
-    console.log('');
+    storeAttachment(response, part.filename);
   });
 
 }
 
-function storeAttachment(file) {
+function storeAttachment(file, filename) {
   try {
     fs.mkdirSync(ATTCH_DIR);
   } catch (err) {
@@ -202,21 +194,15 @@ function storeAttachment(file) {
       throw err;
     }
   }
-  // var dataToEncode = response.data;
-  // // var attachment = new Buffer(dataToEncode, 'base64').toString("ascii"); 
-  var attachment = new Buffer(response.data, 'base64');
-  // // var attachment = Buffer.from(dataToEncode, 'base64'); // Node.js v6.0.0
-
-  fs.writeFile(ATTCH_DIR + part.filename, attachment);
-
-  // console.log('Name of file to store: ' + file.filename);
-  // fs.writeFile(ATTCH_DIR + file.filename, file.data);
-  fs.writeFile(ATTCH_DIR + 'file.txt', file);
-
-  console.log('Attachment stored to ' + ATTCH_DIR);
+  var attachment = new Buffer(file.data, 'base64');
+  // var attachment = new Buffer(dataToEncode, 'base64').toString("ascii");
+  // var attachment = Buffer.from(dataToEncode, 'base64'); // Node.js v6.0.0
+  fs.writeFile(ATTCH_DIR + filename, attachment);
+  attachCounter++;
+  console.log('Аттачей обработано: ' + attachCounter);
+  console.log('');
 }
 
-
-
+module.exports = execute;
 
 // alexpyrielnodejs@gmail.com - email used for testing purposes

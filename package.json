@@ -1,26 +1,26 @@
 {
-  "name": "gmail_nodejs_test",
+  "name": "getgmailattachments",
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "start": "node quickstart.js"
+    "start": "node app.js"
   },
   "dependencies": {
     "google-auth-library": "^0.9.8",
     "googleapis": "^11.0.0",
     "nconf": "^0.8.4"
   },
-  "main": "quickstart.js",
+  "main": "app.js",
   "devDependencies": {},
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/AlexPyriel/GmailNodeJStest.git"
+    "url": "git+https://github.com/AlexPyriel/GmailNodeJS.git"
   },
   "author": "AlexPyriel",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/AlexPyriel/GmailNodeJStest/issues"
+    "url": "https://github.com/AlexPyriel/GmailNodeJS/issues"
   },
-  "homepage": "https://github.com/AlexPyriel/GmailNodeJStest#readme",
+  "homepage": "https://github.com/AlexPyriel/GmailNodeJS#readme",
   "description": ""
 }
