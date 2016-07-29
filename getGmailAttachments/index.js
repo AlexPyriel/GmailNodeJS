@@ -189,7 +189,7 @@ function storeAttachment(filename, err, file) {
   */
   fs.writeFile(ATTCH_DIR + filename, attachment, function (error) {
     if (error) throw error;
-    console.log(filename + ' успешно сохранен');
+    console.log(filename + ' успешно сохранен'); // в теории должно вывести лог только в случае успешного сохранения файла
   });
 }
 
