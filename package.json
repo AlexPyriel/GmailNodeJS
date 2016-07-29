@@ -1,5 +1,5 @@
 {
-  "name": "parser",
+  "name": "gmail_nodejs_test",
   "version": "0.0.0",
   "private": true,
   "scripts": {
@@ -7,19 +7,20 @@
   },
   "dependencies": {
     "google-auth-library": "^0.9.8",
-    "googleapis": "^11.0.0"
+    "googleapis": "^11.0.0",
+    "nconf": "^0.8.4"
   },
   "main": "quickstart.js",
   "devDependencies": {},
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/AlexPyriel/parser.git"
+    "url": "git+https://github.com/AlexPyriel/GmailNodeJStest.git"
   },
   "author": "AlexPyriel",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/AlexPyriel/parser/issues"
+    "url": "https://github.com/AlexPyriel/GmailNodeJStest/issues"
   },
-  "homepage": "https://github.com/AlexPyriel/parser#readme",
+  "homepage": "https://github.com/AlexPyriel/GmailNodeJStest#readme",
   "description": ""
 }
