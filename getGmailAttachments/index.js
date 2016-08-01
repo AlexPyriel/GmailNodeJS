@@ -116,7 +116,6 @@ function listMessages(auth) { // получаем список входящих 
       console.log('The API returned an error: ' + err);
       return;
     }
-    console.log(response);
     var messages = response.messages; // array [{id:'',threadId:''},{...}] 
     if (messages.length === 0) {
       console.log('No messages found.');
