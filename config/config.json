@@ -2,5 +2,6 @@
     "win_attch_dir": "D:/NodeJS/GmailNodeJStest/attachments/",
     "osx_attch_dir": "/Users/AlexPyriel/Applications/GmailNodeJStest/attachments/",
     "win_token_dir": "D:/NodeJS/GmailNodeJStest/.credentials/",
-    "osx_token_dir": "/Users/AlexPyriel/Applications/GmailNodeJStest/.credentials/"
+    "osx_token_dir": "/Users/AlexPyriel/Applications/GmailNodeJStest/.credentials/",
+    "query": "from:alexbo@webconsultants.ru subject: Subject"
 }

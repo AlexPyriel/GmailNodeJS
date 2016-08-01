@@ -110,11 +110,13 @@ function listMessages(auth) { // получаем список входящих 
   gmail.users.messages.list({ // возвращает массив ID сообщений и тредов + resultSizeEstimate
     auth: auth,
     userId: 'me',
+    'q': config.get('query')
   }, function (err, response) {
     if (err) {
       console.log('The API returned an error: ' + err);
       return;
     }
+    console.log(response);
     var messages = response.messages; // array [{id:'',threadId:''},{...}] 
     if (messages.length === 0) {
       console.log('No messages found.');
