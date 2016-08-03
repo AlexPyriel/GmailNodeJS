@@ -2,15 +2,14 @@ var fs = require('fs');
 var readline = require('readline');
 var google = require('googleapis');
 var googleAuth = require('google-auth-library');
+var path = require('path');
 var config = require('../config');
 
 // If modifying these scopes, delete your previously saved credentials
 // at ~/.credentials/gmail-nodejs-quickstart.json
 var SCOPES = ['https://www.googleapis.com/auth/gmail.readonly'];
-var ATTCH_DIR = config.get('win_attch_dir');
-var TOKEN_DIR = config.get('win_token_dir');
-// var ATTCH_DIR = config.get('osx_attch_dir');
-// var TOKEN_DIR = config.get('osx_token_dir');
+var ATTCH_DIR = path.join(__dirname, config.get('attch_dir'));
+var TOKEN_DIR = path.join(__dirname, config.get('token_dir'));
 var TOKEN_PATH = TOKEN_DIR + 'gmail-nodejs-quickstart.json';
 
 // Load client secrets from a local file.
