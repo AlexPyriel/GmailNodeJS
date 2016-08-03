@@ -100,7 +100,6 @@ function storeToken(token) {
   console.log('Token stored to ' + TOKEN_PATH);
 }
 
-// Here my code begins 
 /*
  * @param {google.auth.OAuth2} auth An authorized OAuth2 client.
  */
@@ -123,7 +122,7 @@ function listMessages(auth) { // получаем список входящих 
       console.log(messages);
       console.log('');
       for (var i = 0; i < messages.length; i++) {
-        getMessage(auth, messages[i].id); // тут был вызов через authorize, я просто передал auth дальше
+        getMessage(auth, messages[i].id); 
       }
     }
   });
@@ -189,10 +188,8 @@ function storeAttachment(filename, err, file) {
   */
   fs.writeFile(ATTCH_DIR + filename, attachment, function (error) {
     if (error) throw error;
-    console.log(filename + ' успешно сохранен'); // в теории должно вывести лог только в случае успешного сохранения файла
+    console.log(filename + ' успешно сохранен'); 
   });
 }
 
 module.exports = execute;
-
-// alexpyrielnodejs@gmail.com - email used for testing purposes
