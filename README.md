@@ -1,4 +1,8 @@
 # GmailNodeJS
+
+This is simple NodeJS script, that connects to Gmail inbox, fetches the inbox emails (based on query parameter) and downloads attachments to hard drive.
+Directory for downloaded files as well as  the query parameters are set up in config file.
+
 Step 1: Turn on the Gmail API
 
 Use this wizard (https://console.developers.google.com/flows/enableapi?apiid=gmail) to create or select a project in the Google Developers Console and automatically turn on the API. Click Continue, then Go to credentials.
